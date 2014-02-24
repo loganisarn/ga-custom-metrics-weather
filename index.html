@@ -1,0 +1,59 @@
+
+<html>
+<head>
+    <script language="text/javascript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
+</head>
+<body>
+  <h1>Current temperature is <span id="weatherTemp"></span> &deg;C</h1>
+  <h2>JSON response data:</h2>
+  <p id="weatherInfo"></p>
+  <h2>How to user data object?</h2>
+  <p>In <em>handleWeatherData</em> function you can access all values of the JSON response from openweathermap.org.<br/>Current temperature value displayed using <em>data.main.temp</em>. Other example: wind speed is <em>data.wind.speed</em></p>
+  <h2>How to include weather in Google Analytics as custom dimension?</h2>
+  <h3>Using ga.js</h3>
+  <ul><li><a href="https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingCustomVariables#sessionLevel" target="_blank"><code>_gaq.push(['_setCustomVar',  1, 'User Weather', data.main.temp , 2 ]);</code></a></li></ul>
+  <h3>Using analytics.js</h3>
+  <ul><li><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/custom-dims-mets#sendingdata" target="_blank"><code>ga('send', 'event', 'category', 'action', { 'metric19': data.main.temp });</code></a></li></ul>
+
+  <h2>Credits:</h2>
+  <ul>
+    <li><a href="http://www.simoahava.com/web-development/universal-analytics-weather-custom-dimension/" target="_blank">Simo Ahava's article</a></li>
+    <li><a href="http://www.geoplugin.com/geolocation/" target="_blank">IP Geolocation by geoPlugin</a></li>
+    <li><a href="https://github.com/loganisarn" target="_blank"> This session cookie based implementation by Arnold Matyasi</a></li>
+<script type="text/javascript">
+
+var handleWeatherData = function(jsondata){
+    var data = JSON.parse(jsondata);
+    $("#weatherTemp").html(data.main.temp);
+    $("#weatherInfo").html(jsondata);
+};
+
+var getWeatherData = function(){
+    var vlat = geoplugin_latitude();
+    var vlong = geoplugin_longitude();
+    var owm="http://api.openweathermap.org/data/2.5/weather?lat=" + vlat + "&lon=" + vlong + "&units=metric&callback=?";
+    $.getJSON(owm, function(data) { 
+	var jsondata = JSON.stringify(data);
+	$.cookie('weatherinfo', jsondata);
+	handleWeatherData(jsondata);
+    });
+};
+
+$(document).ready(function()
+{
+    var WeatherJSON = $.cookie('weatherinfo');
+    if (WeatherJSON == undefined) 
+	{
+	    getWeatherData();
+	}
+    else
+	{
+	    handleWeatherData(WeatherJSON);
+	}
+    
+});
+</script>
+</body>
+</html>
